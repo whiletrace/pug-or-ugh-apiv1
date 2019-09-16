@@ -24,9 +24,6 @@ class DogTestCase(TestCase):
 
 class UserDogTestCAse(TestCase):
     def setUp(self):
-
-        self.factory = RequestFactory()
-
         self.user = User.objects.create(
             username='testuser',
             email='loser@loser.com',
@@ -50,3 +47,30 @@ class UserDogTestCAse(TestCase):
         self.assertEqual(test_dog.user.username, 'testuser')
         self.assertIsInstance(test_dog.dog, models.Dog)
         self.assertEqual(test_dog.status, 'l')
+
+
+class UserPrefTest(TestCase):
+
+    def setUp(self):
+
+        self.user = User.objects.create(
+            username='testuser',
+            email='loser@loser.com',
+            password='password'
+            )
+
+        models.UserPref.objects.create(
+            user=self.user,
+            age=['b', 'a', 's'],
+            gender=['m', 'f', 'u'],
+            size=['s', 'm', 'xl', 'l'],
+            )
+
+    def test_user_pref(self):
+        my_pref = models.UserPref.objects.get(user=self.user)
+
+        self.assertEquals(my_pref.user.username, 'testuser')
+        self.assertEqual(my_pref.age, ['b', 'a', 's'])
+
+        self.assertRaises(AttributeError,  setattr(
+            my_pref, 'gender', ['m', 'f', 'u', 'm', 'm']))
