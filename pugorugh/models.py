@@ -97,7 +97,7 @@ class UserPref(models.Model):
 
     gender = MultiSelectField(
         choices=GENDER_CHOICES,
-        max_choices=4
+        max_choices=2
         )
 
     size = MultiSelectField(

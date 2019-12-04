@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from rest_framework import permissions
-from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from rest_framework.generics import CreateAPIView, \
+    GenericAPIView, RetrieveUpdateAPIView
 
 
 from . import models
@@ -15,7 +17,7 @@ class UserRegisterView(CreateAPIView):
 
 
 class Dogs(RetrieveUpdateAPIView):
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     queryset = models.Dog.objects.all()
     serializer_class = serializers.DogSerializer
 
@@ -28,6 +30,31 @@ class Dogs(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
         next_dog = queryset.filter(pk__gt=self.kwargs['pk'])[:1].get()
         return next_dog
+
+
+class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin, GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = models.UserPref.objects.all()
+    serializer_class = serializers.UserPrefSerializer
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        user = self.request.user
+        userpref = queryset.filter(user=user).get()
+        return userpref
+
+    def get(self, request, *args, **kwargs):
+
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+
+        return self.update(request, *args, **kwargs)
+
+
+
+
+
 
 
 

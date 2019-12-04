@@ -7,7 +7,6 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.authtoken.views import obtain_auth_token
 
 from . import views
-
 # API endpoints
 urlpatterns = [
     path('api/user/login/', obtain_auth_token, name='login-user'),
@@ -18,6 +17,8 @@ urlpatterns = [
         )),
     path('', TemplateView.as_view(template_name='index.html')),
     path('api/dog/<pk>/undecided/next/', views.Dogs.as_view(),
-         name='next_undecided')
+         name='next_undecided'),
+    path('api/user/preferences/', views.CreateUpdatePreference.as_view(),
+         name='preferences')
     ]
 urlpatterns = format_suffix_patterns(urlpatterns)
