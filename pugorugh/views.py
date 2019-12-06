@@ -48,7 +48,7 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin, GenericAPIVie
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-
+        import pdb; pdb.set_trace()
         return self.update(request, *args, **kwargs)
 
 
