@@ -47,9 +47,9 @@ class DogSerializer(serializers.ModelSerializer):
 
 
 class UserPrefSerializer(serializers.ModelSerializer):
-    age = serializers.MultipleChoiceField()
-    gender = serializers.MultipleChoiceField()
-    size = serializers.MultipleChoiceField()
+    age = serializers.MultipleChoiceField(choices=AGE_CHOICES)
+    gender = serializers.MultipleChoiceField(choices=GENDER_CHOICES)
+    size = serializers.MultipleChoiceField(choices=SIZE_CHOICES)
 
     class Meta:
         model = models.UserPref
