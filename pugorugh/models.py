@@ -3,43 +3,43 @@ from django.db import models
 
 from multiselectfield import MultiSelectField
 
-BABY = 'b'
-YOUNG = 'y'
-ADULT = 'a'
-SENIOR = 's'
-MALE = 'm'
-FEMALE = 'f'
-UNKNOWN = 'u'
-SMALL = 's'
-MEDIUM = 'm'
-LARGE = 'l'
-XLARGE = 'xl'
 
-GENDER_CHOICES = [
+class Dog(models.Model):
+
+    BABY = 'b'
+    YOUNG = 'y'
+    ADULT = 'a'
+    SENIOR = 's'
+    MALE = 'm'
+    FEMALE = 'f'
+    UNKNOWN = 'u'
+    SMALL = 's'
+    MEDIUM = 'm'
+    LARGE = 'l'
+    XLARGE = 'xl'
+
+    GENDER_CHOICES = [
         (MALE, 'Male'),
         (FEMALE, 'Female'),
         (UNKNOWN, 'Unknown')
         ]
 
-SIZE_CHOICES = [
-    (SMALL, 'Small'),
-    (MEDIUM, 'Medium'),
-    (LARGE, 'Large'),
-    (XLARGE, 'Extra Large'),
-    (UNKNOWN, 'Unknown')
-    ]
+    SIZE_CHOICES = [
+        (SMALL, 'Small'),
+        (MEDIUM, 'Medium'),
+        (LARGE, 'Large'),
+        (XLARGE, 'Extra Large'),
+        (UNKNOWN, 'Unknown')
+        ]
 
-AGE_CHOICES = [
+    AGE_CHOICES = [
         (BABY, 'Baby'),
         (YOUNG, 'Young'),
         (ADULT, 'Adult'),
         (SENIOR, 'Senior')
-    ]
+        ]
 
-
-class Dog(models.Model):
-
-    name = models.CharField(max_length=50,blank=True, default='')
+    name = models.CharField(max_length=50, blank=True, default='')
     image_filename = models.CharField(max_length=100, blank=True, default='')
     breed = models.CharField(max_length=50, default='')
     age = models.IntegerField()
@@ -47,7 +47,7 @@ class Dog(models.Model):
         max_length=1,
         choices=GENDER_CHOICES,
         default=UNKNOWN
-                              )
+        )
     size = models.CharField(
         max_length=1,
         choices=SIZE_CHOICES,
@@ -84,23 +84,59 @@ class UserDog(models.Model):
 
 
 class UserPref(models.Model):
+    BABY = 'b'
+    YOUNG = 'y'
+    ADULT = 'a'
+    SENIOR = 's'
+    MALE = 'm'
+    FEMALE = 'f'
+    UNKNOWN = 'u'
+    SMALL = 's'
+    MEDIUM = 'm'
+    LARGE = 'l'
+    XLARGE = 'xl'
+
+    GENDER_CHOICES = [
+        (MALE, 'Male'),
+        (FEMALE, 'Female'),
+        (UNKNOWN, 'Unknown')
+        ]
+
+    SIZE_CHOICES = [
+        (SMALL, 'Small'),
+        (MEDIUM, 'Medium'),
+        (LARGE, 'Large'),
+        (XLARGE, 'Extra Large'),
+        (UNKNOWN, 'Unknown')
+        ]
+
+    AGE_CHOICES = [
+        (BABY, 'Baby'),
+        (YOUNG, 'Young'),
+        (ADULT, 'Adult'),
+        (SENIOR, 'Senior')
+        ]
 
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE
         )
 
-    age = MultiSelectField(
+    age = models.CharField(
         choices=AGE_CHOICES,
-        max_choices=4,
+        default='b, y, a, s',
+        max_length=10
         )
 
-    gender = MultiSelectField(
+    gender = models.CharField(
         choices=GENDER_CHOICES,
-        max_choices=2
+        default='m, f',
+        max_length=4
+
         )
 
-    size = MultiSelectField(
+    size = models.CharField(
         choices=SIZE_CHOICES,
-        max_choices=4
+        default='s, m, l, xl',
+        max_length=10
         )

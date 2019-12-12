@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from rest_framework import permissions
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.generics import CreateAPIView, \
     GenericAPIView, RetrieveUpdateAPIView
-
-
 from . import models
 from . import serializers
 
@@ -32,7 +31,8 @@ class Dogs(RetrieveUpdateAPIView):
         return next_dog
 
 
-class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin, GenericAPIView):
+class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
+                             GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = models.UserPref.objects.all()
     serializer_class = serializers.UserPrefSerializer
@@ -40,16 +40,20 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin, GenericAPIVie
     def get_object(self):
         queryset = self.get_queryset()
         user = self.request.user
-        userpref = queryset.filter(user=user).get()
-        return userpref
+
+        try:
+            return queryset.filter(user=user).get()
+        except models.UserPref.DoesNotExist:
+            return models.UserPref.objects.create(user=user)
 
     def get(self, request, *args, **kwargs):
-
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        import pdb; pdb.set_trace()
         return self.update(request, *args, **kwargs)
+
+
+
 
 
 

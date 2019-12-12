@@ -3,19 +3,6 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from . import models
-from.models import GENDER_CHOICES, SIZE_CHOICES, AGE_CHOICES
-
-BABY = 'b'
-YOUNG = 'y'
-ADULT = 'a'
-SENIOR = 's'
-MALE = 'm'
-FEMALE = 'f'
-UNKNOWN = 'u'
-SMALL = 's'
-MEDIUM = 'm'
-LARGE = 'l'
-XLARGE = 'xl'
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -36,6 +23,33 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class DogSerializer(serializers.ModelSerializer):
+
+    BABY = 'b'
+    YOUNG = 'y'
+    ADULT = 'a'
+    SENIOR = 's'
+    MALE = 'm'
+    FEMALE = 'f'
+    UNKNOWN = 'u'
+    SMALL = 's'
+    MEDIUM = 'm'
+    LARGE = 'l'
+    XLARGE = 'xl'
+
+    GENDER_CHOICES = [
+        (MALE, 'Male'),
+        (FEMALE, 'Female'),
+        (UNKNOWN, 'Unknown')
+        ]
+
+    SIZE_CHOICES = [
+        (SMALL, 'Small'),
+        (MEDIUM, 'Medium'),
+        (LARGE, 'Large'),
+        (XLARGE, 'Extra Large'),
+        (UNKNOWN, 'Unknown')
+        ]
+
     gender = serializers.ChoiceField(choices=GENDER_CHOICES)
     size = serializers.ChoiceField(choices=SIZE_CHOICES)
 
@@ -47,9 +61,9 @@ class DogSerializer(serializers.ModelSerializer):
 
 
 class UserPrefSerializer(serializers.ModelSerializer):
-    age = serializers.MultipleChoiceField(choices=AGE_CHOICES)
-    gender = serializers.MultipleChoiceField(choices=GENDER_CHOICES)
-    size = serializers.MultipleChoiceField(choices=SIZE_CHOICES)
+    age = serializers.CharField()
+    gender = serializers.CharField()
+    size = serializers.CharField()
 
     class Meta:
         model = models.UserPref
