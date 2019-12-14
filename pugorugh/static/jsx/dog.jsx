@@ -22,8 +22,8 @@ var Dog = React.createClass({
     }.bind(this))
       .fail(function (response) {
         var message = null;
-        if (response.status == 404) {
-          if (this.state.filter == "undecided") {
+        if (response.status === 404) {
+          if (this.state.filter === "undecided") {
             message = "No dogs matched your preferences.";
           } else {
             message = `You don't have any ${this.state.filter} dogs.`;

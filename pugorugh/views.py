@@ -15,6 +15,34 @@ class UserRegisterView(CreateAPIView):
     serializer_class = serializers.UserSerializer
 
 
+class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
+                             GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    queryset = models.UserPref.objects.all()
+    serializer_class = serializers.UserPrefSerializer
+
+    def get_object(self):
+        """
+
+        :return:
+        :rtype:
+
+        """
+        queryset = self.get_queryset()
+        user = self.request.user
+
+        try:
+            return queryset.filter(user=user).get()
+        except models.UserPref.DoesNotExist:
+            return models.UserPref.objects.create(user=user)
+
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+
 class Dogs(RetrieveUpdateAPIView):
     permission_classes = (permissions.IsAuthenticated,)
     queryset = models.Dog.objects.all()
@@ -30,27 +58,6 @@ class Dogs(RetrieveUpdateAPIView):
         next_dog = queryset.filter(pk__gt=self.kwargs['pk'])[:1].get()
         return next_dog
 
-
-class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
-                             GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
-    queryset = models.UserPref.objects.all()
-    serializer_class = serializers.UserPrefSerializer
-
-    def get_object(self):
-        queryset = self.get_queryset()
-        user = self.request.user
-
-        try:
-            return queryset.filter(user=user).get()
-        except models.UserPref.DoesNotExist:
-            return models.UserPref.objects.create(user=user)
-
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
 
 
 
