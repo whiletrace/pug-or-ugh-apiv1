@@ -66,16 +66,14 @@ class UserDog(models.Model):
         (UNDECIDED, 'Undecided')
         ]
 
-    user = models.ManyToManyField(
+    user = models.ForeignKey(
         User,
-        related_name='dogs_user',
-        related_query_name='dog_user'
+        on_delete=models.CASCADE
         )
 
-    dog = models.ManyToManyField(
+    dog = models.ForeignKey(
         'Dog',
-        related_name='users_dog',
-        related_query_name='user_dog',
+        on_delete=models.CASCADE
         )
 
     status = models.CharField(
