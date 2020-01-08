@@ -68,11 +68,18 @@ class UserDog(models.Model):
 
     user = models.ForeignKey(
         User,
+        null=True,
+        related_name='dogs_user',
+        related_query_name='dogs_user_query',
         on_delete=models.CASCADE
         )
 
     dog = models.ForeignKey(
         'Dog',
+        null=True,
+        related_name='users_dog',
+        related_query_name='user_dogs_query',
+
         on_delete=models.CASCADE
         )
 
@@ -119,24 +126,28 @@ class UserPref(models.Model):
 
     user = models.ForeignKey(
         User,
+        related_name='userprefs',
         on_delete=models.CASCADE
         )
 
     age = models.CharField(
         choices=AGE_CHOICES,
-        default='b, y, a, s',
+        default='',
+        blank=True,
         max_length=10
         )
 
     gender = models.CharField(
         choices=GENDER_CHOICES,
-        default='m, f',
+        default='',
+        blank=True,
         max_length=4
 
         )
 
     size = models.CharField(
         choices=SIZE_CHOICES,
-        default='s, m, l, xl',
+        default='',
+        blank=True,
         max_length=10
         )

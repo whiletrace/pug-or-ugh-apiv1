@@ -48,15 +48,44 @@ class Dogs(RetrieveUpdateAPIView):
     queryset = models.Dog.objects.all()
     serializer_class = serializers.DogSerializer
 
+    @staticmethod
+    def convert_age(dogs):
+        for dog in dogs:
+            age_attr = getattr(dog, "age")
+            if age_attr in range(0, 6):
+                setattr(dog, 'age', 'b')
+                yield dog
+            elif age_attr in range(7, 18):
+                setattr(dog, 'age', 'y')
+                yield dog
+            elif age_attr in range(19, 36):
+                setattr(dog, 'age', 'a')
+                yield dog
+            else:
+                setattr(dog, 'age', 's')
+                yield dog
+
     def get_object(self):
         """
 
         :return:
         :rtype:
         """
+
         queryset = self.get_queryset()
-        next_dog = queryset.filter(pk__gt=self.kwargs['pk'])[:1].get()
-        return next_dog
+        test = self.convert_age(queryset)
+        user = self.request.user
+        age = user.userprefs.get().age.split(',')
+        gender = user.userprefs.get().gender.split(',')
+        size = user.userprefs.get().size.split(',')
+        filtered_dog = test.filter(gender__in=gender).filter(size__in=size)
+        try:
+            return queryset.filter(user=user, dog=filtered_dog).get()
+        except models.UserDog.DoesNotExist:
+            return models.UserDog.objects.create(user=user, dog=filtered_dog)
+
+
+
 
 
 
