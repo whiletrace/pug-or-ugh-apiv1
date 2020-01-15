@@ -1,11 +1,11 @@
 from django.contrib.auth.models import User
 from django.db import models
+from itertools import chain
 
 from multiselectfield import MultiSelectField
 
 
 class Dog(models.Model):
-
     BABY = 'b'
     YOUNG = 'y'
     ADULT = 'a'
@@ -151,3 +151,26 @@ class UserPref(models.Model):
         blank=True,
         max_length=10
         )
+
+    def get_age_display(self):
+        ls = []
+        age = self.age.split(',')
+        if len(age) > 1:
+            for a in age:
+                if a == 'b':
+                    ls.append(range(1, 19))
+                elif a == 'y':
+                    ls.append(range(19, 37))
+                elif a == 'a':
+                    ls.append(range(37, 57))
+                elif a == 's':
+                    ls.append(range(57, 100))
+        chained = frozenset(chain.from_iterable(ls))
+        return chained
+
+
+
+
+
+
+
