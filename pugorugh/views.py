@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.models import User
+from django.db.models.query_utils import Q
 from rest_framework import permissions
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.generics import (
@@ -50,8 +49,17 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
 
 class Dogs(RetrieveUpdateAPIView):
     permission_classes = (permissions.AllowAny,)
-    queryset = models.Dog.objects.all()
     serializer_class = serializers.DogSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        preferences = models.UserPref.objects.get(user=user)
+        age = preferences.get_age_display()
+        gender = preferences.gender
+        size = preferences.size
+
+        return models.Dog.objects.filter(Q(age__in=age) & Q(size__in=size) &
+                                         Q(gender__in=gender))
 
     def get_object(self):
         queryset = self.get_queryset()

@@ -126,7 +126,7 @@ class UserPref(models.Model):
 
     user = models.ForeignKey(
         User,
-        related_name='userprefs',
+        related_name='userpref',
         on_delete=models.CASCADE
         )
 
