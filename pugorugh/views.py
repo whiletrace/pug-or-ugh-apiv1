@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import Http404
 from django.db.models.query_utils import Q
 from rest_framework import permissions
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
@@ -6,6 +8,8 @@ from rest_framework.generics import (
     CreateAPIView,
     GenericAPIView, RetrieveUpdateAPIView
     )
+
+
 from . import models
 from . import serializers
 
@@ -44,7 +48,7 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
+        return self.update(request,  *args, **kwargs)
 
 
 class Dogs(RetrieveUpdateAPIView):
@@ -58,9 +62,14 @@ class Dogs(RetrieveUpdateAPIView):
         gender = preferences.gender
         size = preferences.size
 
-        return models.Dog.objects.filter(Q(age__in=age) & Q(size__in=size) &
-                                         Q(gender__in=gender))
+        return models.Dog.objects.filter(
+            Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender)
+            )
 
     def get_object(self):
         queryset = self.get_queryset()
-        return queryset.filter(pk__gt=self.kwargs['pk'])[:1].get()
+        try:
+            return queryset.filter(pk__gt=self.kwargs["pk"]).first()
+        except ObjectDoesNotExist:
+            raise Http404
+

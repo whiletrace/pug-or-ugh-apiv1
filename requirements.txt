@@ -1,3 +1,6 @@
-Django
-djangorestframework
-django-multiselectfield
+coverage==5.0.3
+Django==2.2.7
+django-multiselectfield==0.1.10
+djangorestframework==3.10.3
+pytz==2019.3
+sqlparse==0.3.0
