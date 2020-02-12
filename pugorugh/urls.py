@@ -16,8 +16,15 @@ urlpatterns = [
         permanent=True
         )),
     path('', TemplateView.as_view(template_name='index.html')),
+    path('api/dog/<pk>/liked/', views.UpdateStatus.as_view(),
+         name='update_liked'),
+    path('api/dog/<pk>/disliked/', views.Dogs.as_view(),
+         name='update_disliked'),
+    path('api/dog/<pk>/undecided/', views.Dogs.as_view(),
+         name='update_undecided'),
     path('api/dog/<pk>/undecided/next/', views.Dogs.as_view(),
          name='next_undecided'),
+
     path('api/user/preferences/', views.CreateUpdatePreference.as_view(),
          name='preferences')
     ]

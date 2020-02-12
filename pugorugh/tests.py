@@ -247,6 +247,6 @@ class TestDogs(APITestCase):
 
         request = self.factory.get('api/dog/<pk>/undecided/next/')
         force_authenticate(request, user=self.user)
-        response = views.Dogs.as_view()(request)
+        response = views.Dogs.as_view()(request, pk=2)
 
         self.assertEqual(response.status_code, 200)

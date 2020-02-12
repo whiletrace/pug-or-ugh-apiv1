@@ -6,7 +6,7 @@ from rest_framework import permissions
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.generics import (
     CreateAPIView,
-    GenericAPIView, RetrieveUpdateAPIView
+    GenericAPIView, RetrieveUpdateAPIView, UpdateAPIView
     )
 
 
@@ -54,7 +54,7 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
 class Dogs(RetrieveUpdateAPIView):
     permission_classes = (permissions.AllowAny,)
     serializer_class = serializers.DogSerializer
-
+    import pdb; pdb.set_trace()
     def get_queryset(self):
         user = self.request.user
         preferences = models.UserPref.objects.get(user=user)
@@ -68,8 +68,41 @@ class Dogs(RetrieveUpdateAPIView):
 
     def get_object(self):
         queryset = self.get_queryset()
+        dog = queryset.filter(pk__gt=self.kwargs["pk"])[:1].get()
         try:
-            return queryset.filter(pk__gt=self.kwargs["pk"]).first()
+            return dog
         except ObjectDoesNotExist:
             raise Http404
 
+"""
+
+
+
+
+def put(self, request, *args, **kwargs):
+        import pdb; pdb.set_trace()
+        user_pk = self.request.user
+        dog_pk = self.get_object()
+        obj, user_dog = models.UserDog.objects.update_or_create(
+            user=user_pk, dog=dog_pk)
+        return self.update(request, user_dog, **kwargs)
+"""
+
+
+class UpdateStatus(UpdateAPIView):
+    queryset = models.Dog.objects.all()
+    serializer_class = serializers.DogSerializer
+
+    def get_object(self):
+        pk = self.kwargs['pk']
+        dog = self.queryset.filter(pk__exact=pk)[:1].get()
+        user = self.request.user
+        try:
+            userdog = models.UserDog.objects.get(user=user,dog=dog)
+            return userdog
+        except models.UserDog.DoesNotExist:
+            userdog = models.UserDog.objects.create(dog=dog, user=user)
+            return userdog
+
+    def put(self, request, *args,**kwargs):
+        return self.update(request, status='l', *args, **kwargs)
