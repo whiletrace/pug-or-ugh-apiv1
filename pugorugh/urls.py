@@ -1,12 +1,16 @@
 from django.conf.urls import url
-from django.urls import path
+from django.urls import path, register_converter
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.authtoken.views import obtain_auth_token
 
+from . import converter
 from . import views
+
+register_converter(converter.StatusConverter, 'conv')
+
 # API endpoints
 urlpatterns = [
     path('api/user/login/', obtain_auth_token, name='login-user'),
@@ -16,13 +20,10 @@ urlpatterns = [
         permanent=True
         )),
     path('', TemplateView.as_view(template_name='index.html')),
-    path('api/dog/<pk>/liked/', views.UpdateStatus.as_view(),
-         name='update_liked'),
-    path('api/dog/<pk>/disliked/', views.Dogs.as_view(),
-         name='update_disliked'),
-    path('api/dog/<pk>/undecided/', views.Dogs.as_view(),
-         name='update_undecided'),
-    path('api/dog/<pk>/undecided/next/', views.Dogs.as_view(),
+    path('api/dog/<pk>/<conv:status>/', views.UpdateStatus.as_view(),
+         name='update_status'),
+
+    path('api/dog/<pk>/<conv:status>/next/', views.Dogs.as_view(),
          name='next_undecided'),
 
     path('api/user/preferences/', views.CreateUpdatePreference.as_view(),
