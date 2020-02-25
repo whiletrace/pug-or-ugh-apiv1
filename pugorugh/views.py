@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
+from django.shortcuts import redirect
 from django.db.models.query_utils import Q
 from rest_framework.response import Response
 from rest_framework import permissions
@@ -62,28 +63,27 @@ class Dogs(RetrieveUpdateAPIView):
         age = preferences.get_age_display()
         gender = preferences.gender
         size = preferences.size
-        query = Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender)
         status = self.kwargs['status']
-        if status == 'undecided':
-            return models.Dog.objects.filter(query)
-        elif status == 'liked':
+        dogs = models.Dog.objects.filter(
+            Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender))
+        exclude = dogs.exclude(Q(user_dogs_query__status='l') | Q(user_dogs_query__status='d'))
 
-            return models.UserDog.objects.select_related('dog')\
-                .filter(Q(status='l') & Q(dog__age__in=age) &
-                        Q(dog__size__in=size))
+        if status == 'liked':
+            return dogs.filter(user_dogs_query__status='l',
+                               user_dogs_query__user=user)
+        elif status == 'disliked':
+            return dogs.filter(user_dogs_query__status='d',
+                               user_dogs_query__user=user)
+        else:
+            return exclude
 
     def get_object(self):
         queryset = self.get_queryset()
-        status = self.kwargs['status']
-        if status == 'undecided':
-            dog = queryset.filter(pk__gt=self.kwargs["pk"])[:1].get()
-            try:
-                return dog
-            except ObjectDoesNotExist:
-                raise Http404
-        elif status == 'liked':
-            dog = queryset.filter(dog__pk__gt=self.kwargs["pk"])[:1].get()
-            return dog.dog
+        dog = queryset.filter(pk__gt=self.kwargs["pk"])[:1].get()
+        try:
+            return dog
+        except ObjectDoesNotExist:
+            raise Http404
 
 
 class UpdateStatus(UpdateAPIView):
@@ -115,4 +115,4 @@ class UpdateStatus(UpdateAPIView):
         else:
             dog.status = 'u'
             dog.save()
-        return Response()
+        return Response(status=200)
