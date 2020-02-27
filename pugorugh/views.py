@@ -79,10 +79,11 @@ class Dogs(RetrieveUpdateAPIView):
 
     def get_object(self):
         queryset = self.get_queryset()
-        dog = queryset.filter(pk__gt=self.kwargs["pk"])[:1].get()
+
         try:
+            dog = queryset.filter(pk__gt=self.kwargs["pk"])[0]
             return dog
-        except ObjectDoesNotExist:
+        except IndexError:
             raise Http404
 
 
@@ -93,26 +94,25 @@ class UpdateStatus(UpdateAPIView):
 
     def get_object(self):
         pk = self.kwargs['pk']
-        dog = self.queryset.filter(pk__exact=pk)[:1].get()
         user = self.request.user
-        try:
-            userdog = models.UserDog.objects.get(user=user, dog=dog)
-            return userdog
-        except models.UserDog.DoesNotExist:
-            userdog = models.UserDog.objects.create(dog=dog, user=user)
-            return userdog
+        dog = self.queryset.prefetch_related().filter(
+            Q(user_dogs_query__pk=pk) &
+            Q(user_dogs_query__user=user)).get()
+        return dog
 
     def put(self, request, *args, **kwargs):
-
         status_filter = self.kwargs['status']
         dog = self.get_object()
+        user_dog = dog.users_dog.select_related().get()
+        serializer = serializers.DogSerializer(dog)
         if status_filter == 'liked':
-            dog.status = 'l'
-            dog.save()
+            user_dog.status = 'l'
+            user_dog.save()
         elif status_filter == 'disliked':
-            dog.status = 'd'
-            dog.save()
+            user_dog.status = 'd'
+            user_dog.save()
         else:
-            dog.status = 'u'
-            dog.save()
-        return Response(status=200)
+            user_dog.status = 'u'
+            user_dog.save()
+
+        return Response(serializer.data)
