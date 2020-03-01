@@ -95,10 +95,14 @@ class UpdateStatus(UpdateAPIView):
     def get_object(self):
         pk = self.kwargs['pk']
         user = self.request.user
-        dog = self.queryset.prefetch_related().filter(
-            Q(user_dogs_query__pk=pk) &
-            Q(user_dogs_query__user=user)).get()
-        return dog
+        try:
+            dog = self.queryset.prefetch_related().filter(
+                Q(user_dogs_query__dog__pk=pk) &
+                Q(user_dogs_query__user=user)).get()
+        except models.Dog.DoesNotExist:
+            dog = self.queryset.filter(pk=pk).get()
+            user_dog = dog.users_dog.create(dog=pk, user=user)
+            return user_dog.dog
 
     def put(self, request, *args, **kwargs):
         status_filter = self.kwargs['status']
