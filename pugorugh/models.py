@@ -90,7 +90,6 @@ class UserDog(models.Model):
         )
 
 
-
 class UserPref(models.Model):
     BABY = 'b'
     YOUNG = 'y'

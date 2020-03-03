@@ -66,7 +66,6 @@ class Dogs(RetrieveUpdateAPIView):
         status = self.kwargs['status']
         dogs = models.Dog.objects.filter(
             Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender))
-        exclude = dogs.exclude(Q(user_dogs_query__status='l') | Q(user_dogs_query__status='d'))
 
         if status == 'liked':
             return dogs.filter(user_dogs_query__status='l',
@@ -74,8 +73,19 @@ class Dogs(RetrieveUpdateAPIView):
         elif status == 'disliked':
             return dogs.filter(user_dogs_query__status='d',
                                user_dogs_query__user=user)
-        else:
-            return exclude
+        elif status == 'undecided':
+            truth = bool(dogs.filter(user_dogs_query__status='u',
+                                    user_dogs_query__user=user))
+            if truth is True:
+                return dogs.filter(user_dogs_query__status='u',
+                                   user_dogs_query__user=user)
+            else:
+                for dog in dogs:
+                    user_dog = dog.users_dog.create(
+                        dog=dog, user=user, status='u')
+
+                return dogs.filter(user_dogs_query__status='u',
+                                   user_dogs_query__user=user)
 
     def get_object(self):
         queryset = self.get_queryset()
@@ -99,6 +109,7 @@ class UpdateStatus(UpdateAPIView):
             dog = self.queryset.prefetch_related().filter(
                 Q(user_dogs_query__dog__pk=pk) &
                 Q(user_dogs_query__user=user)).get()
+            return dog
         except models.Dog.DoesNotExist:
             dog = self.queryset.filter(pk=pk).get()
             user_dog = dog.users_dog.create(dog=pk, user=user)
@@ -107,7 +118,8 @@ class UpdateStatus(UpdateAPIView):
     def put(self, request, *args, **kwargs):
         status_filter = self.kwargs['status']
         dog = self.get_object()
-        user_dog = dog.users_dog.select_related().get()
+        user_dog = dog.users_dog.select_related().\
+            filter(user=self.request.user).get()
         serializer = serializers.DogSerializer(dog)
         if status_filter == 'liked':
             user_dog.status = 'l'
