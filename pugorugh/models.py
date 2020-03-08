@@ -16,7 +16,7 @@ class Dog(models.Model):
     SMALL = 's'
     MEDIUM = 'm'
     LARGE = 'l'
-    XLARGE = 'xl'
+    X_LARGE = 'xl'
 
     GENDER_CHOICES = [
         (MALE, 'Male'),
@@ -28,7 +28,7 @@ class Dog(models.Model):
         (SMALL, 'Small'),
         (MEDIUM, 'Medium'),
         (LARGE, 'Large'),
-        (XLARGE, 'Extra Large'),
+        (X_LARGE, 'Extra Large'),
         (UNKNOWN, 'Unknown')
         ]
 
@@ -44,12 +44,12 @@ class Dog(models.Model):
     breed = models.CharField(max_length=50, default='')
     age = models.IntegerField()
     gender = models.CharField(
-        max_length=1,
+        max_length=2,
         choices=GENDER_CHOICES,
         default=UNKNOWN
         )
     size = models.CharField(
-        max_length=1,
+        max_length=2,
         choices=SIZE_CHOICES,
         default=UNKNOWN
         )
@@ -101,7 +101,7 @@ class UserPref(models.Model):
     SMALL = 's'
     MEDIUM = 'm'
     LARGE = 'l'
-    XLARGE = 'xl'
+    X_LARGE = 'xl'
 
     GENDER_CHOICES = [
         (MALE, 'Male'),
@@ -113,7 +113,7 @@ class UserPref(models.Model):
         (SMALL, 'Small'),
         (MEDIUM, 'Medium'),
         (LARGE, 'Large'),
-        (XLARGE, 'Extra Large'),
+        (X_LARGE, 'Extra Large'),
         (UNKNOWN, 'Unknown')
         ]
 
@@ -155,7 +155,7 @@ class UserPref(models.Model):
     def get_age_display(self):
         ls = []
         age = self.age.split(',')
-        if len(age) > 1:
+        if len(age) > 0:
             for a in age:
                 if a == 'b':
                     ls.append(range(1, 19))

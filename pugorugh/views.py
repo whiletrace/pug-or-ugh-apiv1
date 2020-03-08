@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from django.http import Http404
-from django.shortcuts import redirect
 from django.db.models.query_utils import Q
 from rest_framework.response import Response
 from rest_framework import permissions
@@ -14,6 +12,8 @@ from rest_framework.generics import (
 
 from . import models
 from . import serializers
+
+import re
 
 
 class UserRegisterView(CreateAPIView):
@@ -58,6 +58,7 @@ class Dogs(RetrieveUpdateAPIView):
     serializer_class = serializers.DogSerializer
 
     def get_queryset(self):
+
         user = self.request.user
         preferences = models.UserPref.objects.get(user=user)
         age = preferences.get_age_display()
@@ -65,17 +66,11 @@ class Dogs(RetrieveUpdateAPIView):
         size = preferences.size
         status = self.kwargs['status']
         dogs = models.Dog.objects.filter(
-            Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender))
+            Q(age__in=age) & Q(size__in=size.split(',')) & Q(gender__in=gender))
 
-        if status == 'liked':
-            return dogs.filter(user_dogs_query__status='l',
-                               user_dogs_query__user=user)
-        elif status == 'disliked':
-            return dogs.filter(user_dogs_query__status='d',
-                               user_dogs_query__user=user)
-        elif status == 'undecided':
+        if status == 'undecided':
             truth = bool(dogs.filter(user_dogs_query__status='u',
-                                    user_dogs_query__user=user))
+                                     user_dogs_query__user=user))
             if truth is True:
                 return dogs.filter(user_dogs_query__status='u',
                                    user_dogs_query__user=user)
@@ -84,8 +79,15 @@ class Dogs(RetrieveUpdateAPIView):
                     user_dog = dog.users_dog.create(
                         dog=dog, user=user, status='u')
 
-                return dogs.filter(user_dogs_query__status='u',
-                                   user_dogs_query__user=user)
+            return dogs.filter(user_dogs_query__status='u',
+                               user_dogs_query__user=user)
+
+        elif status == 'liked':
+            return dogs.filter(user_dogs_query__status='l',
+                               user_dogs_query__user=user)
+        elif status == 'disliked':
+            return dogs.filter(user_dogs_query__status='d',
+                               user_dogs_query__user=user)
 
     def get_object(self):
         queryset = self.get_queryset()
@@ -105,15 +107,11 @@ class UpdateStatus(UpdateAPIView):
     def get_object(self):
         pk = self.kwargs['pk']
         user = self.request.user
-        try:
-            dog = self.queryset.prefetch_related().filter(
+
+        dog = self.queryset.prefetch_related().filter(
                 Q(user_dogs_query__dog__pk=pk) &
                 Q(user_dogs_query__user=user)).get()
-            return dog
-        except models.Dog.DoesNotExist:
-            dog = self.queryset.filter(pk=pk).get()
-            user_dog = dog.users_dog.create(dog=pk, user=user)
-            return user_dog.dog
+        return dog
 
     def put(self, request, *args, **kwargs):
         status_filter = self.kwargs['status']

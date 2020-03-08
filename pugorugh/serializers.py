@@ -11,7 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = get_user_model().objects.create(
             username=validated_data['username'],
-        )
+            )
 
         user.set_password(validated_data['password'])
         user.save()
@@ -34,7 +34,7 @@ class DogSerializer(serializers.ModelSerializer):
     SMALL = 's'
     MEDIUM = 'm'
     LARGE = 'l'
-    XLARGE = 'xl'
+    X_LARGE = 'xl'
 
     GENDER_CHOICES = [
         (MALE, 'Male'),
@@ -46,7 +46,7 @@ class DogSerializer(serializers.ModelSerializer):
         (SMALL, 'Small'),
         (MEDIUM, 'Medium'),
         (LARGE, 'Large'),
-        (XLARGE, 'Extra Large'),
+        (X_LARGE, 'ExtraLarge'),
         (UNKNOWN, 'Unknown')
         ]
 
@@ -68,5 +68,3 @@ class UserPrefSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.UserPref
         exclude = ['user']
-
-
