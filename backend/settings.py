@@ -27,6 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+INTERNAL_IPS = [
+    # ...
+    '127.0.0.1',
+    # ...
+    ]
 
 APPEND_SLASH = False
 
@@ -42,18 +47,21 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'pugorugh',
-    'multiselectfield'
-]
+    'debug_toolbar',
+
+    ]
 
 MIDDLEWARE = [
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-]
+    ]
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -117,7 +125,14 @@ REST_FRAMEWORK = {
     )
 }
 
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.headers.HeadersPanel',
+    'debug_toolbar.panels.templates.TemplatesPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
 
+    ]
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 

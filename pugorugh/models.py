@@ -1,8 +1,7 @@
-from django.contrib.auth.models import User
-from django.db import models
 from itertools import chain
 
-from multiselectfield import MultiSelectField
+from django.contrib.auth.models import User
+from django.db import models
 
 
 class Dog(models.Model):

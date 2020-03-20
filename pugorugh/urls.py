@@ -1,10 +1,9 @@
-from django.conf.urls import url
-from django.urls import path, register_converter
+from django.conf import settings
+from django.urls import include, path, register_converter
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
-
-from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework.urlpatterns import format_suffix_patterns
 
 from . import converter
 from . import views
@@ -29,4 +28,10 @@ urlpatterns = [
     path('api/user/preferences/', views.CreateUpdatePreference.as_view(),
          name='preferences')
     ]
+if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns = [
+                      path('__debug__/', include(debug_toolbar.urls))
+                      ] + urlpatterns
 urlpatterns = format_suffix_patterns(urlpatterns)

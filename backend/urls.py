@@ -13,9 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.urls import path, include
 from django.contrib import admin
-
+from django.urls import include, path
 from rest_framework.authtoken import views
 
 urlpatterns = [
@@ -25,3 +24,4 @@ urlpatterns = [
                                namespace='rest_framework')),
     path('api-token-auth/', views.obtain_auth_token),
 ]
+

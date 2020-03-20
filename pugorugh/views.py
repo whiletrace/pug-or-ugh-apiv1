@@ -1,19 +1,16 @@
 from django.contrib.auth import get_user_model
-from django.http import Http404
 from django.db.models.query_utils import Q
-from rest_framework.response import Response
+from django.http import Http404
 from rest_framework import permissions
-from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.generics import (
     CreateAPIView,
     GenericAPIView, RetrieveUpdateAPIView, UpdateAPIView,
     )
-
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from rest_framework.response import Response
 
 from . import models
 from . import serializers
-
-import re
 
 
 class UserRegisterView(CreateAPIView):
@@ -24,8 +21,8 @@ class UserRegisterView(CreateAPIView):
 
 class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
                              GenericAPIView):
-    permission_classes = (permissions.IsAuthenticated,)
 
+    permission_classes = (permissions.IsAuthenticated,)
     queryset = models.UserPref.objects.all()
     serializer_class = serializers.UserPrefSerializer
 
@@ -62,25 +59,24 @@ class Dogs(RetrieveUpdateAPIView):
         user = self.request.user
         preferences = models.UserPref.objects.get(user=user)
         age = preferences.get_age_display()
-        gender = preferences.gender
-        size = preferences.size
+        gender = preferences.gender.split(',')
+        size = preferences.size.split(',')
         status = self.kwargs['status']
         dogs = models.Dog.objects.filter(
-            Q(age__in=age) & Q(size__in=size.split(',')) & Q(gender__in=gender))
+            Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender))
 
         if status == 'undecided':
-            truth = bool(dogs.filter(user_dogs_query__status='u',
-                                     user_dogs_query__user=user))
+            truth = bool(
+                dogs.filter(user_dogs_query__status__in=['u', 'l', 'd'],
+                            user_dogs_query__user=user))
             if truth is True:
                 return dogs.filter(user_dogs_query__status='u',
                                    user_dogs_query__user=user)
             else:
                 for dog in dogs:
-                    user_dog = dog.users_dog.create(
-                        dog=dog, user=user, status='u')
+                    dog.users_dog.create(dog=dog, user=user, status='u')
 
-            return dogs.filter(user_dogs_query__status='u',
-                               user_dogs_query__user=user)
+            return dogs
 
         elif status == 'liked':
             return dogs.filter(user_dogs_query__status='l',
@@ -93,40 +89,43 @@ class Dogs(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
 
         try:
-            dog = queryset.filter(pk__gt=self.kwargs["pk"])[0]
+            dog = queryset.filter(pk__gt=self.kwargs["pk"]).first()
             return dog
-        except IndexError:
+        except models.Dog.DoesNotExist:
             raise Http404
 
 
 class UpdateStatus(UpdateAPIView):
-    queryset = models.Dog.objects.all()
     permission_classes = (permissions.AllowAny,)
     serializer_class = serializers.DogSerializer
 
-    def get_object(self):
-        pk = self.kwargs['pk']
-        user = self.request.user
+    def get_queryset(self):
 
-        dog = self.queryset.prefetch_related().filter(
-                Q(user_dogs_query__dog__pk=pk) &
-                Q(user_dogs_query__user=user)).get()
+        user_id = self.request.user.id
+        dogs = models.Dog.objects.filter(user_dogs_query__user_id=user_id)
+        return dogs
+
+    def get_object(self):
+        queryset = self.get_queryset()
+        user = self.request.user
+        pk = self.kwargs['pk']
+        dog = queryset.filter(pk=pk).get().users_dog.select_related().filter(
+            user=user).get()
         return dog
 
     def put(self, request, *args, **kwargs):
+
         status_filter = self.kwargs['status']
         dog = self.get_object()
-        user_dog = dog.users_dog.select_related().\
-            filter(user=self.request.user).get()
-        serializer = serializers.DogSerializer(dog)
         if status_filter == 'liked':
-            user_dog.status = 'l'
-            user_dog.save()
-        elif status_filter == 'disliked':
-            user_dog.status = 'd'
-            user_dog.save()
-        else:
-            user_dog.status = 'u'
-            user_dog.save()
+            dog.status = 'l'
+            dog.save()
+        if status_filter == 'disliked':
+            dog.status = 'd'
+            dog.save()
 
-        return Response(serializer.data)
+        if status_filter == 'undecided':
+            if dog.status != 'u':
+                dog.status = 'u'
+                dog.save()
+        return Response()
