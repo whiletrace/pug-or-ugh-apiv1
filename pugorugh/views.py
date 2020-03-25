@@ -89,7 +89,7 @@ class Dogs(RetrieveUpdateAPIView):
         queryset = self.get_queryset()
 
         try:
-            dog = queryset.filter(pk__gt=self.kwargs["pk"]).first()
+            dog = queryset.filter(pk__gt=self.kwargs["pk"])[:1].get()
             return dog
         except models.Dog.DoesNotExist:
             raise Http404
