@@ -166,10 +166,3 @@ class UserPref(models.Model):
                     ls.append(range(57, 100))
         chained = frozenset(chain.from_iterable(ls))
         return chained
-
-
-
-
-
-
-

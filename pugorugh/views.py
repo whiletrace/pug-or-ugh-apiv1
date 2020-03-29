@@ -21,7 +21,6 @@ class UserRegisterView(CreateAPIView):
 
 class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
                              GenericAPIView):
-
     permission_classes = (permissions.IsAuthenticated,)
     queryset = models.UserPref.objects.all()
     serializer_class = serializers.UserPrefSerializer
@@ -47,7 +46,7 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
         return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
-        return self.update(request,  *args, **kwargs)
+        return self.update(request, *args, **kwargs)
 
 
 class Dogs(RetrieveUpdateAPIView):
@@ -64,20 +63,9 @@ class Dogs(RetrieveUpdateAPIView):
         status = self.kwargs['status']
         dogs = models.Dog.objects.filter(
             Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender))
-
         if status == 'undecided':
-            truth = bool(
-                dogs.filter(user_dogs_query__status__in=['u', 'l', 'd'],
-                            user_dogs_query__user=user))
-            if truth is True:
-                return dogs.filter(user_dogs_query__status='u',
-                                   user_dogs_query__user=user)
-            else:
-                for dog in dogs:
-                    dog.users_dog.create(dog=dog, user=user, status='u')
-
-            return dogs
-
+            return dogs.filter(user_dogs_query__status='u',
+                               user_dogs_query__user=user)
         elif status == 'liked':
             return dogs.filter(user_dogs_query__status='l',
                                user_dogs_query__user=user)
@@ -86,10 +74,11 @@ class Dogs(RetrieveUpdateAPIView):
                                user_dogs_query__user=user)
 
     def get_object(self):
+        #import pdb; pdb.set_trace()
         queryset = self.get_queryset()
 
         try:
-            dog = queryset.filter(pk__gt=self.kwargs["pk"])[:1].get()
+            dog = queryset.filter(pk__gt=self.kwargs["pk"]).first()
             return dog
         except models.Dog.DoesNotExist:
             raise Http404

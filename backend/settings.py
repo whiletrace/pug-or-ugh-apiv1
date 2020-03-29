@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'pugorugh',
+    'pugorugh.apps.PugorughConfig',
     'debug_toolbar'
 
     ]
@@ -131,6 +131,7 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.settings.SettingsPanel',
     'debug_toolbar.panels.headers.HeadersPanel',
     'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.signals.SignalsPanel',
     'debug_toolbar.panels.sql.SQLPanel',
 
 
