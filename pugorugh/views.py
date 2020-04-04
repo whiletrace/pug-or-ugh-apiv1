@@ -74,22 +74,22 @@ class Dogs(RetrieveUpdateAPIView):
                                user_dogs_query__user=user)
 
     def get_object(self):
-        #import pdb; pdb.set_trace()
+
         queryset = self.get_queryset()
 
         try:
-            dog = queryset.filter(pk__gt=self.kwargs["pk"]).first()
+            dog = queryset.filter(pk__gt=self.kwargs["pk"])[0]
             return dog
-        except models.Dog.DoesNotExist:
+        except IndexError:
             raise Http404
 
 
 class UpdateStatus(UpdateAPIView):
+
     permission_classes = (permissions.AllowAny,)
     serializer_class = serializers.DogSerializer
 
     def get_queryset(self):
-
         user_id = self.request.user.id
         dogs = models.Dog.objects.filter(user_dogs_query__user_id=user_id)
         return dogs
@@ -103,18 +103,18 @@ class UpdateStatus(UpdateAPIView):
         return dog
 
     def put(self, request, *args, **kwargs):
-
         status_filter = self.kwargs['status']
         dog = self.get_object()
+        serializer = self.serializer_class(dog.dog)
         if status_filter == 'liked':
             dog.status = 'l'
             dog.save()
         if status_filter == 'disliked':
             dog.status = 'd'
             dog.save()
-
         if status_filter == 'undecided':
             if dog.status != 'u':
                 dog.status = 'u'
                 dog.save()
-        return Response()
+
+        return Response(serializer.data)
