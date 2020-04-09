@@ -5,4 +5,4 @@ class PugorughConfig(AppConfig):
     name = 'pugorugh'
 
     def ready(self):
-        pass
+        import pugorugh.signals
