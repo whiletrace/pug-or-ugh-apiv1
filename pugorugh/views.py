@@ -30,7 +30,6 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
 
         :return:
         :rtype:
-
         """
 
         queryset = self.get_queryset()
@@ -50,7 +49,7 @@ class CreateUpdatePreference(RetrieveModelMixin, UpdateModelMixin,
 
 
 class Dogs(RetrieveUpdateAPIView):
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = serializers.DogSerializer
 
     def get_queryset(self):
@@ -63,6 +62,7 @@ class Dogs(RetrieveUpdateAPIView):
         status = self.kwargs['status']
         dogs = models.Dog.objects.filter(
             Q(age__in=age) & Q(size__in=size) & Q(gender__in=gender))
+
         if status == 'undecided':
             return dogs.filter(user_dogs_query__status='u',
                                user_dogs_query__user=user)
@@ -85,8 +85,7 @@ class Dogs(RetrieveUpdateAPIView):
 
 
 class UpdateStatus(UpdateAPIView):
-
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = serializers.DogSerializer
 
     def get_queryset(self):

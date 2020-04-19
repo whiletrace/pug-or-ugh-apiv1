@@ -1,5 +1,5 @@
-from django.test import TestCase
 from django.contrib.auth.models import User
+from django.test import TestCase
 from rest_framework.test import (
     APIRequestFactory, APITestCase, force_authenticate
     )
@@ -13,6 +13,8 @@ from . import views
 
 
 # model tests
+
+
 class DogTestCase(TestCase):
 
     def setUp(self):
@@ -236,17 +238,39 @@ class TestDogs(APITestCase):
             )
 
         self.user_pref = {
-            'user': self.user,
-            'age': 'y, a, s',
-            'gender': 'm, f',
-            'size': 'xl, m'
+            'user':self.user,
+            'age':'y, a, s',
+            'gender':'f',
+            'size':'xl'
             }
         self.preference = models.UserPref.objects.create(**self.user_pref)
 
     def test_get(self):
-
-        request = self.factory.get('api/dog/<pk>/undecided/next/')
+        request = self.factory.get('api/dog/<pk>/<conv:status>/next/')
         force_authenticate(request, user=self.user)
-        response = views.Dogs.as_view()(request, pk=2)
+        response = views.Dogs.as_view()(request, pk=-1, status='undecided')
 
         self.assertEqual(response.status_code, 200)
+
+
+class TestUpdateStatus(APITestCase):
+    fixtures = ['dogs.json']
+
+    def setUp(self):
+        self.factory = APIRequestFactory()
+        self.user = User.objects.create(
+            username='testuser',
+            email='loser@loser.com',
+            password='password'
+            )
+
+    def test_put(self):
+        request = self.factory.put('api/dog/<pk>/<conv:status>/')
+        force_authenticate(request, user=self.user)
+        response = views.UpdateStatus.as_view()(request, pk=2, status='liked')
+        self.assertEqual(response.status_code, 200)
+        user_id = self.user.id
+        queryset = models.Dog.objects.filter(user_dogs_query__user_id=user_id)
+        dog = queryset.filter(pk=2).get().users_dog.select_related().filter(
+            user=self.user).get()
+        self.assertEqual(dog.status, 'l')
