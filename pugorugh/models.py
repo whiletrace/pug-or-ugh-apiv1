@@ -5,6 +5,63 @@ from django.db import models
 
 
 class Dog(models.Model):
+    """
+    a class that defines the database representation of a Dog obj.
+
+    subclasses django.db.models
+
+    Attr:
+        BABY: str()
+            value if dog age is baby
+        YOUNG: str()
+            value if dog age is young
+        ADULT: str()
+            value if dog age is adult
+        SENIOR:str()
+            value if dog age is senior
+        MALE : str()
+            value if dog gender is male
+        FEMALE: str()
+            value if dog gender is female
+        UNKNOWN: str()
+            value if gender is not known
+        SMALL: str()
+            value if dog size is small
+        MEDIUM: str()
+            value if dog size is medium
+        LARGE: str()
+            value if dog size is large
+        X_LARGE: str()
+            value if dog size is X Large
+
+        GENDER_CHOICES: list()
+            list of two tuples defining available
+            attribute values for Dog objects gender
+
+        SIZE_CHOICES: list()
+            list of two tuples defining available
+            attribute values for Dog objects size
+
+        name: django ORM CharField obj()
+            defines database column for Dogs name
+
+        image_filename: django ORM CharField obj()
+            defines database column for Dogs image_filename
+
+        breed:  django ORM CharField obj()
+            defines database column for Dog breed
+
+        age: django ORM IntegerField obj()
+            defines database column for Dog age
+
+        gender: django ORM CharField obj()
+            defines database column for Dog gender
+            :argument GENDER_CHOICES
+
+        size:  django ORM CharField obj()
+            defines database column for Dog size
+            :argument SIZE_CHOICES
+    """
     BABY = 'b'
     YOUNG = 'y'
     ADULT = 'a'
@@ -31,13 +88,6 @@ class Dog(models.Model):
         (UNKNOWN, 'Unknown')
         ]
 
-    AGE_CHOICES = [
-        (BABY, 'Baby'),
-        (YOUNG, 'Young'),
-        (ADULT, 'Adult'),
-        (SENIOR, 'Senior')
-        ]
-
     name = models.CharField(max_length=50, blank=True, default='')
     image_filename = models.CharField(max_length=100, blank=True, default='')
     breed = models.CharField(max_length=50, default='')
@@ -55,6 +105,31 @@ class Dog(models.Model):
 
 
 class UserDog(models.Model):
+    """
+    a class that defines the database representation of a UserDog obj
+
+    subclasses django.db.models
+
+    Attr:
+        LIKED: str()
+            value if UserDog status is liked
+        DISLIKED: str()
+            value if UserDog status is disliked
+        UNDECIDED: str()
+            value if UserDog status is undecided
+
+        DOG_STATUS: list()
+            list of two tuples defining available
+            attribute values for UserDog attr status
+
+        user: django ORM ForeignKeyField obj()
+            defines database one to many relation to User
+        dog: django ORM ForeignKeyField obj()
+            defines database one to many relation to Model.Dog
+        status:  django ORM CharField obj()
+            defines database column for UserDog status
+            :argument DOG_STATUS
+    """
     LIKED = 'l'
     DISLIKED = 'd'
     UNDECIDED = 'u'
@@ -90,6 +165,65 @@ class UserDog(models.Model):
 
 
 class UserPref(models.Model):
+    """
+    a class that defines the database representation of a UserPref obj.
+
+    subclasses django.db.models
+
+    Attr:
+        BABY: str()
+            value if dog age is baby
+        YOUNG: str()
+            value if dog age is young
+        ADULT: str()
+            value if dog age is adult
+        SENIOR:str()
+            value if dog age is senior
+        MALE : str()
+            value if dog gender is male
+        FEMALE: str()
+            value if dog gender is female
+        UNKNOWN: str()
+            value if gender is not known
+        SMALL: str()
+            value if dog size is small
+        MEDIUM: str()
+            value if dog size is medium
+        LARGE: str()
+            value if dog size is large
+        X_LARGE: str()
+            value if dog size is X Large
+
+        GENDER_CHOICES: list()
+            list of two tuples defining available
+            attribute values for Dog objects gender
+
+        SIZE_CHOICES: list()
+            list of two tuples defining available
+            attribute values for Dog objects size
+
+        AGE_CHOICES: list()
+            list of two tuples defining available
+            attribute values for Dog objects size
+
+        user: django ORM ForeignKeyField obj()
+            defines database one to many relation to User
+
+        age: django ORM CharField obj()
+            defines database column for UserPref age
+            :argument AGE_CHOICES
+
+        gender: django ORM CharField obj()
+            defines database column for UserPref gender
+            :argument GENDER_CHOICES
+
+        size:  django ORM CharField obj()
+            defines database column for UserPref size
+            :argument SIZE_CHOICES
+
+    Method:
+        get_age_display
+    """
     BABY = 'b'
     YOUNG = 'y'
     ADULT = 'a'
@@ -152,6 +286,11 @@ class UserPref(models.Model):
         )
 
     def get_age_display(self):
+        """
+        converts sequence of UserPref.age values to a frozenset of chained range
+
+        :rtype: frozenset
+        """
         ls = []
         age = self.age.split(',')
         if len(age) > 0:
