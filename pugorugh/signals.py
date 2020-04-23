@@ -9,6 +9,11 @@ user = get_user_model()
 
 @receiver(post_save, sender=user)
 def userdog_receiver(sender, instance, created, **kwargs):
+    """Custom signal receiver when a User is created
+
+        if a user object is created model.UserDog objects related to user
+        are bulk created from all available model.Dog objects database
+    """
     if created:
         dogs = Dog.objects.all()
         UserDog.objects.bulk_create(
